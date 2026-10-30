@@ -1,0 +1,727 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>DeshiD Hishob</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout concept: a shop ledger on a phone. Sticky date header, one entry form on top, the day's entries listed beneath, five-tab bottom bar. Boldness lives in the bottle-green hero on Home. */
+:root{
+  --bg:#F1F4EF; --surface:#FFFFFF; --surface2:#E7EDE8; --fg:#12211A; --muted:#58695F; --line:#D5DDD7;
+  --accent:#0E5A47; --on-accent:#FFFFFF; --amber:#8F5A00; --amber-bg:#F6EACB; --danger:#B3261E; --ok:#1B6E43;
+  --display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --body:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1512; --surface:#16211B; --surface2:#1F2D26; --fg:#E6EFE9; --muted:#97AB9F; --line:#2A3A32;
+  --accent:#4FC79F; --on-accent:#06150F; --amber:#E3AE45; --amber-bg:#3A2D10; --danger:#FF8A80; --ok:#6FD39F; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1512; --surface:#16211B; --surface2:#1F2D26; --fg:#E6EFE9; --muted:#97AB9F; --line:#2A3A32;
+  --accent:#4FC79F; --on-accent:#06150F; --amber:#E3AE45; --amber-bg:#3A2D10; --danger:#FF8A80; --ok:#6FD39F; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.45 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:0 calc(84px + env(safe-area-inset-bottom,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
+.wrap{max-width:560px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance}
+h2{font-size:18px;font-weight:700;letter-spacing:-.01em}
+h3{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:18px}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono,td,.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0 10px;border-bottom:1px solid var(--line)}
+.brand{min-width:0}
+.brand b{font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:-.02em;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand small{color:var(--muted);font-size:12px;display:flex;align-items:center;gap:6px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block}
+.dot.local{background:var(--amber)}
+.langbtn{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:10px;min-height:40px;padding:0 12px;font-weight:600;font-size:14px;flex:none}
+.hdr-r{display:flex;gap:8px;align-items:center;flex:none}
+.datein{font:500 14px var(--mono);background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:40px;max-width:150px}
+
+main{padding-top:16px;display:flex;flex-direction:column;gap:20px}
+section{min-width:0}
+
+/* hero */
+.hero{background:var(--accent);color:var(--on-accent);border-radius:16px;padding:18px 18px 16px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.85}
+.big{font:700 40px/1.1 var(--display);letter-spacing:-.02em;margin-top:6px}
+.hero .sub{opacity:.85;font-size:13px}
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0 0;padding-top:14px;border-top:1px solid color-mix(in srgb,var(--on-accent) 28%,transparent)}
+.trio dt{font-size:11px;letter-spacing:.06em;text-transform:uppercase;opacity:.8}
+.trio dd{margin:2px 0 0;font:500 17px var(--mono)}
+
+/* tiles + lists */
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:left;display:flex;flex-direction:column;gap:2px;min-height:68px}
+.tile b{font-family:var(--display);font-size:16px}
+.tile span{color:var(--muted);font-size:12.5px}
+.rows{display:flex;flex-direction:column}
+.rows>div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.rows>div:last-child{border-bottom:0}
+.muted{color:var(--muted)}
+.empty{color:var(--muted);padding:14px;border:1px dashed var(--line);border-radius:12px;text-align:center}
+
+/* forms */
+.form{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:14px}
+.fld{display:flex;flex-direction:column;gap:5px;min-width:0}
+.fld>label,.lab{font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+input,select,textarea{font:16px var(--body);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:46px;width:100%;min-width:0}
+input.mono{font-family:var(--mono)}
+textarea{min-height:76px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button,.chip{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:9px 14px;min-height:42px;font-weight:500}
+.seg button[aria-pressed="true"],.chip[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.seg.fill button{flex:1}
+.step{display:grid;grid-template-columns:52px 1fr 52px;gap:8px}
+.step button{border:1px solid var(--line);background:var(--bg);border-radius:10px;font-size:22px;min-height:46px}
+.step input{text-align:center;font:500 20px var(--mono)}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:10px 12px;min-height:46px;width:100%;text-align:left}
+.switch i{width:42px;height:24px;border-radius:99px;background:var(--line);position:relative;flex:none}
+.switch i::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--surface);transition:transform .15s}
+.switch[aria-pressed="true"] i{background:var(--amber)}
+.switch[aria-pressed="true"] i::after{transform:translateX(18px)}
+.amt{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:10px}
+.amt b{font:600 24px var(--mono)}
+.btn{background:var(--accent);color:var(--on-accent);border:0;border-radius:12px;min-height:50px;padding:0 18px;font-weight:600;font-size:16px;width:100%}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line);width:auto;min-height:42px;font-size:14px;padding:0 14px}
+.x{border:0;background:transparent;color:var(--muted);font-size:20px;line-height:1;padding:6px 10px;min-height:40px;border-radius:8px}
+.x:hover{color:var(--danger)}
+
+/* entries */
+.ent{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.ent:last-child{border-bottom:0}
+.ent .l{min-width:0}
+.ent .l b{display:block;font-weight:600}
+.ent .l span{color:var(--muted);font-size:13px}
+.ent .r{display:flex;align-items:center;gap:2px;flex:none}
+.ent .r .num{font-weight:500}
+.tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;background:var(--amber-bg);color:var(--amber);border-radius:6px;padding:1px 6px;margin-left:6px}
+
+/* tables */
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{font:600 11px var(--body);letter-spacing:.05em;text-transform:uppercase;color:var(--muted);text-align:right;padding:9px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--surface);font-family:var(--body);font-weight:500;white-space:normal;min-width:96px}
+tr:last-child td{border-bottom:0}
+tfoot td,.tot td{font-weight:600;background:var(--surface2)}
+tfoot td:first-child,.tot td:first-child{background:var(--surface2)}
+.neg{color:var(--danger)}
+.bar{height:6px;border-radius:3px;background:var(--surface2);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent)}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px}
+.kpi span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.kpi b{display:block;font:600 20px var(--mono);margin-top:2px}
+.monthnav{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.monthnav b{font-family:var(--display);font-size:17px}
+.note{font-size:13px;color:var(--muted)}
+.diff{padding:10px 12px;border-radius:10px;font-weight:600}
+.diff.ok{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.diff.bad{background:var(--amber-bg);color:var(--amber)}
+.denom{display:grid;grid-template-columns:70px 1fr 90px;gap:10px;align-items:center}
+.denom input{text-align:center;font-family:var(--mono)}
+.denom .num{text-align:right}
+
+/* nav + toast */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--surface);border-top:1px solid var(--line);
+  padding:6px max(10px,env(safe-area-inset-left,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-right,0px))}
+.nav div{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
+.nav button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;border-radius:10px;font-size:11.5px;font-weight:500;color:var(--muted);min-height:52px}
+.nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav button.on{color:var(--accent);background:var(--surface2)}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + env(safe-area-inset-bottom,0px));z-index:40;background:var(--fg);color:var(--bg);padding:11px 16px;border-radius:12px;font-size:14px;display:none;align-items:center;gap:14px;max-width:calc(100vw - 32px)}
+#toast.show{display:flex}
+#toast button{background:transparent;border:0;color:inherit;text-decoration:underline;font-weight:600;padding:0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><b id="shopName">DeshiD Hishob</b><small><span id="syncDot" class="dot local"></span><span>देशी हिशोब</span><span id="syncTxt"></span></small></div>
+    <div class="hdr-r"><button class="langbtn" id="langBtn" data-act="lang" aria-label="Language"></button><input class="datein" type="date" id="dateIn" aria-label="Working date"></div>
+  </header>
+  <main id="view"></main>
+</div>
+<div id="toast" role="status"></div>
+<nav class="nav" aria-label="Main"><div>
+  <button data-act="nav" data-v="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Home</button>
+  <button data-act="nav" data-v="sales"><svg viewBox="0 0 24 24"><path d="M6 4h12M6 9h12M9 4c4 0 6 2 6 5s-2 5-6 5H8l8 6"/></svg>Sales</button>
+  <button data-act="nav" data-v="purchases"><svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7M12 11v10"/></svg>Purchase</button>
+  <button data-act="nav" data-v="expenses"><svg viewBox="0 0 24 24"><path d="M3 8h16a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8zM3 8l12-4v4M16 14h2"/></svg>Expenses</button>
+  <button data-act="nav" data-v="reports"><svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>Reports</button>
+</div></nav>
+
+<script>
+(function(){
+'use strict';
+/* ---------- constants ---------- */
+const SZ=[{ml:90,box:100},{ml:180,box:48},{ml:750,box:12}];
+const OTHER=[{name:'Cold Drink',prices:[10,20]},{name:'Water Bottle',prices:[10,20]},{name:'Glass',prices:[5,10]},{name:'Chakna',prices:[5,10]}];
+const EXP=['Daily Misc','Wages','Electricity','Transport','Tea & Snacks'];
+const NEWS=['Company Scheme','Liquor Industry','Excise Dept.'];
+const DEN=[500,200,100,50,20,10];
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONF=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const VIEWS=['home','sales','purchases','expenses','reports','stock','news','setup'];
+
+/* ---------- helpers ---------- */
+const $=(s,r)=>(r||document).querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=v=>{const n=parseFloat(v);return isFinite(n)?n:0};
+const inr=n=>{n=num(n);const r=Math.round(n);const t=Math.abs(n-r)<0.005?r.toLocaleString('en-IN'):n.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});return '₹'+t};
+const nf=n=>Math.round(num(n)*100)/100;
+const lit=n=>(Math.round(n*100)/100).toLocaleString('en-IN')+' L';
+const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36);
+const boxOf=ml=>SZ.find(s=>s.ml===ml).box;
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function fmtD(s){const p=String(s||'').split('-');return p.length<3?'':(+p[2])+' '+(LANG==='mr'?MONm:MON)[p[1]-1]+' '+p[0]}
+function fmtLong(s){return new Date(s+'T00:00:00').toLocaleDateString(LANG==='mr'?'mr-IN-u-nu-latn':'en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}
+function monthLabel(m){const p=m.split('-');return (LANG==='mr'?MONFm:MONF)[p[1]-1]+' '+p[0]}
+function shiftMonth(m,n){const p=m.split('-').map(Number);const d=new Date(p[0],p[1]-1+n,1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')}
+function setT(id,t){const e=document.getElementById(id);if(e)e.textContent=trStr(t)}
+
+/* ---------- language ---------- */
+let LANG='mr';
+try{const l=localStorage.getItem('dh_lang');if(l==='en'||l==='mr')LANG=l}catch(e){}
+const MONm=['जाने','फेब्रु','मार्च','एप्रि','मे','जून','जुलै','ऑग','सप्टें','ऑक्टो','नोव्हें','डिसें'];
+const MONFm=['जानेवारी','फेब्रुवारी','मार्च','एप्रिल','मे','जून','जुलै','ऑगस्ट','सप्टेंबर','ऑक्टोबर','नोव्हेंबर','डिसेंबर'];
+const MR={'Home':'मुख्य','Sales':'विक्री','Purchase':'खरेदी','Purchases':'खरेदी','Expenses':'खर्च','Reports':'अहवाल',
+'Stock balance':'साठा शिल्लक','Opening stock':'सुरुवातीचा साठा','Net balance after expenses':'खर्च वजा करून शिल्लक','Liquor sold today':'आज विकलेली दारू','Other items':'इतर वस्तू','Open':'उघडा',
+'Daily report':'दैनिक अहवाल','Stock, sale, cash, export':'साठा, विक्री, रोख, एक्सपोर्ट','News':'बातम्या','Schemes, excise':'योजना, उत्पादन शुल्क','Setup':'सेटअप','Brands, prices, TCS':'ब्रँड, किंमत, TCS',
+'Liquor':'दारू','Brand':'ब्रँड','Size':'साईज','Bulk sale':'बल्क विक्री','Quantity (bottles)':'प्रमाण (बाटल्या)','Quantity (boxes)':'प्रमाण (बॉक्स)','Quantity':'प्रमाण',
+'Purchase rate / bottle':'खरेदी दर / बाटली','Sale price / bottle':'विक्री किंमत / बाटली','Add sale':'विक्री नोंदवा','Item':'वस्तू','Price':'किंमत','Amount':'रक्कम','Add item':'वस्तू जोडा',
+'No sales yet for this date.':'या तारखेला अजून विक्री नाही.','Total sales':'एकूण विक्री','Enter a quantity':'प्रमाण भरा','Enter the sale price':'विक्री किंमत भरा','Enter the price':'किंमत भरा','Enter the amount':'रक्कम भरा','Enter boxes or bottles':'बॉक्स किंवा बाटल्या भरा',
+'Cold Drink':'कोल्ड ड्रिंक','Water Bottle':'पाण्याची बाटली','Glass':'ग्लास','Chakna':'चकना',
+'Date':'तारीख','Party name':'पार्टीचे नाव','Bill no.':'बिल क्र.','TP no.':'टीपी क्र.','Sr. no.':'अ.क्र.','Description (brand)':'तपशील (ब्रँड)','Loose bottles':'सुट्या बाटल्या','Batch no.':'बॅच क्र.','Batch month':'बॅच महिना','Rate / case':'दर / बॉक्स',
+'Tax collected at source on this bill':'या बिलावर स्रोतावर कर (TCS)','Amount ':'रक्कम','Bill total':'बिल एकूण','Add purchase':'खरेदी नोंदवा','Recent purchases':'अलीकडील खरेदी','No purchases recorded yet.':'अजून खरेदी नोंदलेली नाही.','No party':'पार्टी नाही',
+'Category':'प्रकार','Daily Misc':'दैनिक किरकोळ','Wages':'मजुरी','Electricity':'वीज','Transport':'वाहतूक','Tea & Snacks':'चहा व नाश्ता','Note (optional)':'टीप (ऐच्छिक)','Add expense':'खर्च नोंदवा','No expenses for this date.':'या तारखेला खर्च नाही.','Total':'एकूण','Expense added':'खर्च नोंदवला',
+'Daily':'दैनिक','Company':'कंपनी','Monthly':'मासिक','Save PDF':'PDF सेव्ह करा','Save Excel':'Excel सेव्ह करा','Saving files is not available in this view.':'या ठिकाणी फाईल सेव्ह करता येत नाही.',
+'Stock':'साठा','Purch.':'खरेदी','Bal.':'शिल्लक','Sale':'विक्री','Qty':'प्रमाण','Day total':'दिवसाचा एकूण','Total amount':'एकूण रक्कम','Net balance':'निव्वळ शिल्लक',
+'Cash collection':'रोख जमा','Cash details (number of notes)':'रोख तपशील (नोटांची संख्या)','Cash total':'रोख एकूण','UPI + cash':'UPI + रोख','Share':'शेअर','Copy report text':'अहवाल मजकूर कॉपी करा','Report copied':'अहवाल कॉपी केला','Select and copy the text':'मजकूर निवडून कॉपी करा',
+'Party':'पार्टी','Bill':'बिल','Bottles':'बाटल्या','Brand-wise report':'ब्रँडनुसार अहवाल','Company-wise report':'कंपनीनुसार अहवाल','Monthly report (bulk litres)':'मासिक अहवाल (बल्क लिटर)',
+'Bulk btl':'बल्क बाटल्या','Litres':'लिटर','Margin':'नफा','Bills':'बिले','Litres sold':'विकलेले लिटर','Litres purchased':'खरेदी केलेले लिटर','Net after expenses':'खर्चानंतर निव्वळ',
+'Margin counts only sales where a purchase rate was entered. Bottle counts are in bottles.':'नफा फक्त खरेदी दर भरलेल्या विक्रीवर मोजला जातो. संख्या बाटल्यांमध्ये आहे.',
+'Cash and UPI match the net balance.':'रोख आणि UPI निव्वळ शिल्लकशी जुळते.',
+'Balance = opening stock + purchases − sales. Shown in boxes, with loose bottles after the box count. Red means more was sold than recorded in stock.':'शिल्लक = सुरुवातीचा साठा + खरेदी − विक्री. बॉक्समध्ये दाखवले आहे, सुट्या बाटल्या बॉक्सच्या पुढे. लाल रंग म्हणजे नोंदलेल्या साठ्यापेक्षा जास्त विक्री झाली.',
+'Bottles in hand before your first entry in this app.':'या app मध्ये पहिली नोंद करण्यापूर्वी हातात असलेल्या बाटल्या.',
+'All':'सर्व','Company Scheme':'कंपनी योजना','Liquor Industry':'दारू उद्योग','Excise Dept.':'उत्पादन शुल्क विभाग','Add a note':'नोंद जोडा','Type':'प्रकार','Title':'शीर्षक','Details':'तपशील','Save note':'नोंद सेव्ह करा',
+'Nothing here yet. Add company schemes, excise circulars or industry news you hear about.':'अजून काही नाही. कंपनी योजना, उत्पादन शुल्क परिपत्रके किंवा उद्योगाच्या बातम्या येथे नोंदवा.','Note saved':'नोंद सेव्ह केली','Add a title':'शीर्षक भरा',
+'Shop name':'दुकानाचे नाव','Sale price per bottle':'प्रति बाटली विक्री किंमत','Used as the starting price on every new sale. You can still change it for a single sale.':'प्रत्येक नवीन विक्रीत हीच किंमत सुरुवातीला येते. एका विक्रीसाठी बदलता येते.',
+'TCS on purchases':'खरेदीवर TCS','Added on each purchase bill amount. You can switch it off for a single bill.':'प्रत्येक खरेदी बिलाच्या रकमेवर जोडला जातो. एखाद्या बिलासाठी बंद करता येतो.','TCS rate (%)':'TCS दर (%)',
+'Brands':'ब्रँड','New brand':'नवीन ब्रँड','Add brand':'ब्रँड जोडा','Type a brand name':'ब्रँडचे नाव लिहा',
+'Entries are saved online and open on any device you sign in with.':'नोंदी online सेव्ह होतात आणि sign in केलेल्या कोणत्याही device वर उघडतात.','Entries are saved on this phone only. Open the page while signed in to Claude to save them online.':'नोंदी फक्त या फोनवर सेव्ह आहेत. Online सेव्ह करण्यासाठी Claude मध्ये sign in करून पान उघडा.',
+'Entry deleted':'नोंद काढली','Purchase deleted':'खरेदी काढली','Note deleted':'नोंद काढली','Undo':'पूर्ववत','File saved. Send it from your phone.':'फाईल सेव्ह झाली. फोनवरून पाठवा.','Saving files is not available here':'येथे फाईल सेव्ह करता येत नाही','Could not create the file':'फाईल तयार करता आली नाही','Could not load the export tool. Check the internet and try again.':'एक्सपोर्ट टूल लोड झाले नाही. Internet तपासून पुन्हा प्रयत्न करा.',
+'· saved online':'· online सेव्ह','· saved on this phone':'· फक्त फोनवर सेव्ह','· not saved, retry':'· सेव्ह झाले नाही, पुन्हा करा',
+'Bulk':'बल्क','Shop':'दुकान','Language':'भाषा'};
+const RX=[
+[/^Add TCS (.+)%$/,x=>'TCS '+x[1]+'% जोडा'],[/^Entries for (.+)$/,x=>x[1]+' च्या नोंदी'],[/^Expenses on (.+)$/,x=>x[1]+' चे खर्च'],
+[/^Stock at end of (.+)$/,x=>x[1]+' अखेरचा साठा'],[/^In hand at end of (.+)$/,x=>x[1]+' अखेर शिल्लक'],
+[/^Added (.+)$/,x=>'नोंद केली '+x[1]],[/^Purchase added · (.+)$/,x=>'खरेदी नोंदवली · '+x[1]],
+[/^No sales in (.+)\.$/,x=>x[1]+' मध्ये विक्री नाही.'],[/^No purchases in (.+)\.$/,x=>x[1]+' मध्ये खरेदी नाही.'],[/^No entries in (.+)\.$/,x=>x[1]+' मध्ये नोंदी नाहीत.'],
+[/^Boxes \((\d+) btl\)$/,x=>'बॉक्स ('+x[1]+' बाटल्या)'],[/^Enter full boxes \((\d+) bottles each\)$/,x=>'पूर्ण बॉक्स भरा (प्रत्येकी '+x[1]+' बाटल्या)'],
+[/^Short by (.+) against net balance\.$/,x=>'निव्वळ शिल्लकपेक्षा '+x[1]+' कमी.'],[/^Excess of (.+) over net balance\.$/,x=>'निव्वळ शिल्लकपेक्षा '+x[1]+' जास्त.'],
+[/^Preparing (PDF|Excel)…$/,x=>x[1]+' तयार करत आहे…'],[/^Shop · (.+)$/,x=>'दुकान · '+x[1]],[/^(.+) · Bill (.+)$/,x=>x[1]+' · बिल '+x[2]]];
+function trStr(str){
+  if(LANG!=='mr'||!str)return str;
+  const m=String(str).match(/^(\s*)([\s\S]*?)(\s*)$/),core=m[2];if(!core)return str;
+  let out=MR[core];
+  if(out==null){for(let i=0;i<RX.length;i++){const x=core.match(RX[i][0]);if(x){out=RX[i][1](x);break}}}
+  if(out==null)out=core.replace(/\bbottles\b/g,'बाटल्या').replace(/\bbtl\b/g,'बाटली').replace(/\bboxes\b/g,'बॉक्स').replace(/\bbox\b/g,'बॉक्स').replace(/\bBill\b/g,'बिल').replace(/\bBatch\b/g,'बॅच').replace(/\bBulk\b/g,'बल्क').replace(/(\d) L\b/g,'$1 ली');
+  return m[1]+out+m[3];
+}
+function trDom(root){
+  if(!root)return;
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const nodes=[];let n;while((n=w.nextNode()))nodes.push(n);
+  nodes.forEach(t=>{const p=t.parentNode&&t.parentNode.nodeName;if(p==='TEXTAREA'||p==='SCRIPT'||p==='STYLE')return;
+    if(t._en==null)t._en=t.nodeValue;const v=LANG==='mr'?trStr(t._en):t._en;if(t.nodeValue!==v)t.nodeValue=v});
+  if(LANG==='mr')root.querySelectorAll('[placeholder]').forEach(e=>{e.placeholder=({'Company / supplier':'कंपनी / पुरवठादार','Shown on the daily report':'दैनिक अहवालावर दिसेल','Brand name':'ब्रँडचे नाव'})[e.placeholder]||e.placeholder});
+}
+
+/* ---------- state ---------- */
+const cfg0=()=>({shop:'',brands:['Tango Panch','Sakhu Santra','Mastani Santra'],prices:{90:40,180:80,750:230},opening:{},tcs:2});
+let S={config:cfg0(),days:{},purchases:{},news:{}};
+const store={db:null,dl:undefined,q:new Map()};
+const ui={view:'home',date:todayStr(),month:todayStr().slice(0,7),rep:'daily',saleTab:'liquor',newsCat:'All',
+  f:{brand:'',ml:90,bulk:false,qty:'',buy:'',price:'',oitem:'Cold Drink',oprice:10,oqty:'',ecat:'Daily Misc',eamt:'',enote:'',
+     p:{date:'',party:'',bill:'',tp:'',sr:'',brand:'',note:'',ml:90,boxes:'',loose:'',batch:'',bmonth:'',rate:'',tcs:true},
+     n:{cat:'Company Scheme',title:'',text:''}}};
+
+function emptyDay(d){return {date:d,sales:[],other:[],expenses:[],cash:{upi:0,den:{}}}}
+function day(d){return S.days[d]||emptyDay(d)}
+function ensureDay(d){if(!S.days[d])S.days[d]=emptyDay(d);const D=S.days[d];D.sales=D.sales||[];D.other=D.other||[];D.expenses=D.expenses||[];D.cash=D.cash||{upi:0,den:{}};D.cash.den=D.cash.den||{};return D}
+function getPath(k){return k.split('.').reduce((o,p)=>o&&o[p],ui.f)}
+function setPath(k,v){const p=k.split('.');const last=p.pop();const o=p.reduce((a,b)=>a[b],ui.f);o[last]=v}
+
+/* ---------- persistence ---------- */
+function persistLocal(){try{localStorage.setItem('dh_v1',JSON.stringify(S))}catch(e){}}
+function loadLocal(){try{const r=localStorage.getItem('dh_v1');if(r){const o=JSON.parse(r);S.config=Object.assign(cfg0(),o.config||{});S.days=o.days||{};S.purchases=o.purchases||{};S.news=o.news||{}}}catch(e){}}
+function queue(path,fn){const prev=store.q.get(path)||Promise.resolve();const nx=prev.then(fn).catch(()=>setSync(false,true));store.q.set(path,nx);return nx}
+function saveDay(d){if(!store.db){persistLocal();return}const v=JSON.parse(JSON.stringify(S.days[d]));queue('days/'+d,()=>store.db.doc('days/'+d).set(v))}
+function savePurch(id){if(!store.db){persistLocal();return}const v=S.purchases[id];queue('purchases/'+id,()=>v?store.db.doc('purchases/'+id).set(JSON.parse(JSON.stringify(v))):store.db.doc('purchases/'+id).delete())}
+function saveNews(id){if(!store.db){persistLocal();return}const v=S.news[id];queue('news/'+id,()=>v?store.db.doc('news/'+id).set(JSON.parse(JSON.stringify(v))):store.db.doc('news/'+id).delete())}
+function saveCfg(){if(!store.db){persistLocal();return}const v=JSON.parse(JSON.stringify(S.config));queue('config/main',()=>store.db.doc('config/main').set(v))}
+function setSync(cloud,err){const d=$('#syncDot');if(!d)return;d.className='dot'+(cloud&&!err?'':' local');setT('syncTxt',err?' · not saved, retry':(cloud?' · saved online':' · saved on this phone'))}
+
+function subscribe(){
+  const onErr=()=>setSync(true,true);
+  const db=store.db;
+  db.doc('config/main').onSnapshot(s=>{if(s.exists)S.config=Object.assign(cfg0(),JSON.parse(JSON.stringify(s.data())));refresh()},onErr);
+  const coll=(name,key)=>db.collection(name).onSnapshot(snap=>{
+    snap.docChanges().forEach(c=>{
+      if(c.type==='removed')delete S[key][c.doc.id];
+      else S[key][c.doc.id]=JSON.parse(JSON.stringify(c.doc.data()));
+    });refresh()},onErr);
+  coll('days','days');coll('purchases','purchases');coll('news','news');
+}
+
+/* ---------- data queries ---------- */
+function allSales(){const a=[];for(const d in S.days)(S.days[d].sales||[]).forEach(s=>a.push(Object.assign({d},s)));return a}
+function allBrands(){const set=new Set(S.config.brands);allSales().forEach(s=>set.add(s.brand));Object.values(S.purchases).forEach(p=>p.brand&&set.add(p.brand));return [...set]}
+function stockAt(b,ml,d){let v=num(S.config.opening[b+'|'+ml]);
+  Object.values(S.purchases).forEach(p=>{if(p.brand===b&&p.ml===ml&&p.date<d)v+=num(p.bottles)});
+  allSales().forEach(s=>{if(s.brand===b&&s.ml===ml&&s.d<d)v-=num(s.bottles)});return v}
+function purchQty(b,ml,d){let v=0;Object.values(S.purchases).forEach(p=>{if(p.brand===b&&p.ml===ml&&p.date===d)v+=num(p.bottles)});return v}
+function saleOn(b,ml,d){let q=0,a=0;(day(d).sales||[]).forEach(s=>{if(s.brand===b&&s.ml===ml){q+=num(s.bottles);a+=num(s.amt)}});return {q,a}}
+function totals(d){const D=day(d);let liq=0,oth=0,exp=0,btl=0;const by={};SZ.forEach(z=>by[z.ml]={q:0,a:0});
+  (D.sales||[]).forEach(s=>{liq+=num(s.amt);btl+=num(s.bottles);if(by[s.ml]){by[s.ml].q+=num(s.bottles);by[s.ml].a+=num(s.amt)}});
+  (D.other||[]).forEach(o=>oth+=num(o.amt));(D.expenses||[]).forEach(e=>exp+=num(e.amt));
+  return {liq,oth,sales:liq+oth,exp,net:liq+oth-exp,bottles:btl,by}}
+function pTot(p){return p.total!=null?num(p.total):num(p.amt)}
+function lastBuy(b,ml){let best=null;Object.values(S.purchases).forEach(p=>{if(p.brand===b&&p.ml===ml&&num(p.rate)>0&&(!best||p.date>best.date||(p.date===best.date&&p.t>best.t)))best=p});
+  return best?nf(num(best.rate)/boxOf(ml)):''}
+function applySaleDefaults(){const F=ui.f;if(!F.brand)F.brand=S.config.brands[0]||'';F.price=String(S.config.prices[F.ml]||'');F.buy=String(lastBuy(F.brand,F.ml)||'')}
+
+/* ---------- toast ---------- */
+let tt=null;
+function toast(msg,undo){const t=$('#toast');t.innerHTML='<span>'+esc(trStr(msg))+'</span>'+(undo?'<button data-act="undo">'+esc(trStr('Undo'))+'</button>':'');t.classList.add('show');window._undo=undo||null;clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),undo?6000:2600)}
+
+/* ---------- views ---------- */
+function vHome(){
+  const t=totals(ui.date);
+  const pur=Object.values(S.purchases).filter(p=>p.date===ui.date).reduce((a,p)=>a+pTot(p),0);
+  const sizes=SZ.map(z=>'<div><span>'+z.ml+' ml</span><span class="num">'+t.by[z.ml].q+' btl · '+inr(t.by[z.ml].a)+'</span></div>').join('');
+  return '<section style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2>Stock balance</h2><button class="btn ghost" data-act="nav" data-v="stock">Opening stock</button></div>'+
+    '<div class="note">In hand at end of '+esc(fmtD(ui.date))+'</div><div id="stockTbl">'+stockTable()+'</div></section>'+
+    '<section class="hero"><div class="eyebrow">'+esc(fmtLong(ui.date))+'</div><div class="big">'+inr(t.net)+'</div><div class="sub">Net balance after expenses</div>'+
+    '<dl class="trio"><div><dt>Sales</dt><dd>'+inr(t.sales)+'</dd></div><div><dt>Purchases</dt><dd>'+inr(pur)+'</dd></div><div><dt>Expenses</dt><dd>'+inr(t.exp)+'</dd></div></dl></section>'+
+    '<section><h2>Liquor sold today</h2><div class="rows">'+sizes+'<div><span>Other items</span><span class="num">'+inr(t.oth)+'</span></div></div></section>'+
+    '<section><h2>Open</h2><div class="tiles">'+
+    '<button class="tile" data-act="nav" data-v="reports"><b>Daily report</b><span>Stock, sale, cash, export</span></button>'+
+    '<button class="tile" data-act="nav" data-v="news"><b>News</b><span>Schemes, excise</span></button>'+
+    '<button class="tile" data-act="nav" data-v="setup"><b>Setup</b><span>Brands, prices, TCS</span></button></div></section>';
+}
+
+function stepper(k,val,label){return '<div class="step"><button type="button" data-act="step" data-k="'+k+'" data-d="-1" aria-label="Decrease">−</button><input class="mono" type="number" inputmode="decimal" min="0" data-f="'+k+'" value="'+esc(val)+'" aria-label="'+esc(label)+'" placeholder="0"><button type="button" data-act="step" data-k="'+k+'" data-d="1" aria-label="Increase">+</button></div>'}
+function sizeSeg(k,cur){return '<div class="seg fill">'+SZ.map(z=>'<button type="button" data-act="f" data-k="'+k+'" data-t="n" data-v="'+z.ml+'" aria-pressed="'+(cur===z.ml)+'">'+z.ml+' ml</button>').join('')+'</div>'}
+
+function vSales(){
+  const F=ui.f,D=day(ui.date);
+  if(!F.price&&ui.saleTab==='liquor'&&!F.brand)applySaleDefaults();
+  const tabs='<div class="seg fill"><button data-act="saletab" data-v="liquor" aria-pressed="'+(ui.saleTab==='liquor')+'">Liquor</button><button data-act="saletab" data-v="other" aria-pressed="'+(ui.saleTab==='other')+'">Other items</button></div>';
+  let form;
+  if(ui.saleTab==='liquor'){
+    const box=boxOf(F.ml);
+    form='<div class="form">'+
+      '<div class="fld"><label for="f_brand">Brand</label><select id="f_brand" data-f="brand" data-r="1">'+allBrands().map(b=>'<option'+(b===F.brand?' selected':'')+'>'+esc(b)+'</option>').join('')+'</select></div>'+
+      '<div class="fld"><span class="lab">Size</span>'+sizeSeg('ml',F.ml)+'</div>'+
+      '<button type="button" class="switch" data-act="bulk" aria-pressed="'+F.bulk+'"><span><b>Bulk sale</b><br><span class="note">Enter full boxes ('+box+' bottles each)</span></span><i></i></button>'+
+      '<div class="fld"><span class="lab">'+(F.bulk?'Quantity (boxes)':'Quantity (bottles)')+'</span>'+stepper('qty',F.qty,'Quantity')+'</div>'+
+      '<div class="two"><div class="fld"><label for="f_buy">Purchase rate / bottle</label><input id="f_buy" class="mono" type="number" inputmode="decimal" data-f="buy" value="'+esc(F.buy)+'" placeholder="0"></div>'+
+      '<div class="fld"><label for="f_price">Sale price / bottle</label><input id="f_price" class="mono" type="number" inputmode="decimal" data-f="price" value="'+esc(F.price)+'"></div></div>'+
+      '<div class="amt"><span class="note" id="btl"></span><b id="amt">₹0</b></div>'+
+      '<button class="btn" data-act="addSale">Add sale</button></div>';
+  }else{
+    const it=OTHER.find(o=>o.name===F.oitem)||OTHER[0];
+    form='<div class="form"><div class="fld"><span class="lab">Item</span><div class="seg">'+OTHER.map(o=>'<button type="button" data-act="oitem" data-v="'+esc(o.name)+'" aria-pressed="'+(o.name===F.oitem)+'">'+esc(o.name)+'</button>').join('')+'</div></div>'+
+      '<div class="fld"><span class="lab">Price</span><div class="seg">'+it.prices.map(p=>'<button type="button" data-act="oprice" data-v="'+p+'" aria-pressed="'+(num(F.oprice)===p)+'">₹'+p+'</button>').join('')+'</div>'+
+      '<input id="f_oprice" class="mono" type="number" inputmode="decimal" data-f="oprice" value="'+esc(F.oprice)+'" aria-label="Price"></div>'+
+      '<div class="fld"><span class="lab">Quantity</span>'+stepper('oqty',F.oqty,'Quantity')+'</div>'+
+      '<div class="amt"><span class="note">Amount</span><b id="amt">₹0</b></div>'+
+      '<button class="btn" data-act="addOther">Add item</button></div>';
+  }
+  const items=[];
+  (D.sales||[]).forEach(s=>items.push({t:s.t,html:'<div class="ent"><div class="l"><b>'+esc(s.brand)+' · '+s.ml+' ml'+(s.bulk?'<span class="tag">Bulk</span>':'')+'</b><span>'+(s.bulk?s.bulk+' box · ':'')+s.bottles+' × ₹'+nf(s.price)+'</span></div><div class="r"><span class="num">'+inr(s.amt)+'</span><button class="x" data-act="delSale" data-id="'+s.id+'" aria-label="Delete entry">×</button></div></div>'}));
+  (D.other||[]).forEach(o=>items.push({t:o.t,html:'<div class="ent"><div class="l"><b>'+esc(o.item)+'</b><span>'+o.qty+' × ₹'+nf(o.price)+'</span></div><div class="r"><span class="num">'+inr(o.amt)+'</span><button class="x" data-act="delOther" data-id="'+o.id+'" aria-label="Delete entry">×</button></div></div>'}));
+  items.sort((a,b)=>b.t-a.t);
+  const t=totals(ui.date);
+  return '<section><h2>Sales</h2></section><section style="display:flex;flex-direction:column;gap:14px">'+tabs+form+'</section>'+
+    '<section><h2>Entries for '+esc(fmtD(ui.date))+'</h2>'+(items.length?'<div>'+items.map(i=>i.html).join('')+'</div><div class="rows"><div><b>Total sales</b><b class="num">'+inr(t.sales)+'</b></div></div>':'<div class="empty">No sales yet for this date.</div>')+'</section>';
+}
+
+function vPurch(){
+  const P=ui.f.p;
+  const parties=[...new Set(Object.values(S.purchases).map(p=>p.party).filter(Boolean))];
+  const list=Object.values(S.purchases).sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:(b.t||0)-(a.t||0)).slice(0,40);
+  if(!P.brand)P.brand=S.config.brands[0]||'';
+  return '<section><h2>Purchases</h2></section><section><div class="form">'+
+    '<div class="two"><div class="fld"><label for="p_date">Date</label><input id="p_date" class="mono" type="date" data-f="p.date" value="'+esc(P.date||ui.date)+'"></div>'+
+    '<div class="fld"><label for="p_party">Party name</label><input id="p_party" list="parties" data-f="p.party" value="'+esc(P.party)+'" placeholder="Company / supplier"><datalist id="parties">'+parties.map(x=>'<option value="'+esc(x)+'">').join('')+'</datalist></div></div>'+
+    '<div class="three"><div class="fld"><label for="p_bill">Bill no.</label><input id="p_bill" class="mono" data-f="p.bill" value="'+esc(P.bill)+'"></div>'+
+    '<div class="fld"><label for="p_tp">TP no.</label><input id="p_tp" class="mono" data-f="p.tp" value="'+esc(P.tp)+'"></div>'+
+    '<div class="fld"><label for="p_sr">Sr. no.</label><input id="p_sr" class="mono" inputmode="numeric" data-f="p.sr" value="'+esc(P.sr)+'"></div></div>'+
+    '<div class="fld"><label for="p_brand">Description (brand)</label><select id="p_brand" data-f="p.brand" data-r="1">'+allBrands().map(b=>'<option'+(b===P.brand?' selected':'')+'>'+esc(b)+'</option>').join('')+'</select></div>'+
+    '<div class="fld"><span class="lab">Size</span>'+sizeSeg('p.ml',P.ml)+'</div>'+
+    '<div class="two"><div class="fld"><label for="p_boxes">Boxes ('+boxOf(P.ml)+' btl)</label><input id="p_boxes" class="mono" type="number" inputmode="decimal" data-f="p.boxes" value="'+esc(P.boxes)+'" placeholder="0"></div>'+
+    '<div class="fld"><label for="p_loose">Loose bottles</label><input id="p_loose" class="mono" type="number" inputmode="decimal" data-f="p.loose" value="'+esc(P.loose)+'" placeholder="0"></div></div>'+
+    '<div class="two"><div class="fld"><label for="p_batch">Batch no.</label><input id="p_batch" class="mono" data-f="p.batch" value="'+esc(P.batch)+'"></div>'+
+    '<div class="fld"><label for="p_bm">Batch month</label><input id="p_bm" class="mono" type="month" data-f="p.bmonth" value="'+esc(P.bmonth)+'"></div></div>'+
+    '<div class="fld"><label for="p_rate">Rate / case</label><input id="p_rate" class="mono" type="number" inputmode="decimal" data-f="p.rate" value="'+esc(P.rate)+'" placeholder="0"></div>'+
+    '<button type="button" class="switch" data-act="tcs" aria-pressed="'+P.tcs+'"><span><b>Add TCS '+num(S.config.tcs)+'%</b><br><span class="note">Tax collected at source on this bill</span></span><i></i></button>'+
+    '<div class="rows"><div><span class="muted">Amount</span><span class="num" id="pamt">₹0</span></div><div><span class="muted">TCS</span><span class="num" id="ptcs">₹0</span></div><div><b>Bill total</b><b class="num" id="ptot">₹0</b></div><div><span class="note" id="pbtl"></span></div></div>'+
+    '<button class="btn" data-act="addPurch">Add purchase</button></div></section>'+
+    '<section><h2>Recent purchases</h2>'+(list.length?'<div>'+list.map(p=>'<div class="ent"><div class="l"><b>'+esc(p.party||'No party')+(p.bill?' · Bill '+esc(p.bill):'')+'</b><span>'+esc(fmtD(p.date))+' · '+esc(p.brand)+' '+p.ml+' ml · '+(p.boxes?p.boxes+' box':'')+(p.boxes&&p.loose?' + ':'')+(p.loose?p.loose+' btl':'')+(p.batch?' · Batch '+esc(p.batch):'')+''+(num(p.tcs)?' · TCS '+inr(p.tcs):'')+'</span></div><div class="r"><span class="num">'+inr(pTot(p))+'</span><button class="x" data-act="delPurch" data-id="'+p.id+'" aria-label="Delete purchase">×</button></div></div>').join('')+'</div>':'<div class="empty">No purchases recorded yet.</div>')+'</section>';
+}
+
+function vExp(){
+  const F=ui.f,D=day(ui.date);const ex=(D.expenses||[]).slice().sort((a,b)=>b.t-a.t);
+  const tot=ex.reduce((s,e)=>s+num(e.amt),0);
+  return '<section><h2>Expenses</h2></section><section><div class="form">'+
+    '<div class="fld"><span class="lab">Category</span><div class="seg">'+EXP.map(c=>'<button type="button" data-act="f" data-k="ecat" data-v="'+esc(c)+'" aria-pressed="'+(F.ecat===c)+'">'+esc(c)+'</button>').join('')+'</div></div>'+
+    '<div class="fld"><label for="e_amt">Amount</label><input id="e_amt" class="mono" type="number" inputmode="decimal" data-f="eamt" value="'+esc(F.eamt)+'" placeholder="0"></div>'+
+    '<div class="fld"><label for="e_note">Note (optional)</label><input id="e_note" data-f="enote" value="'+esc(F.enote)+'"></div>'+
+    '<button class="btn" data-act="addExp">Add expense</button></div></section>'+
+    '<section><h2>Expenses on '+esc(fmtD(ui.date))+'</h2>'+(ex.length?'<div>'+ex.map(e=>'<div class="ent"><div class="l"><b>'+esc(e.cat)+'</b>'+(e.note?'<span>'+esc(e.note)+'</span>':'')+'</div><div class="r"><span class="num">'+inr(e.amt)+'</span><button class="x" data-act="delExp" data-id="'+e.id+'" aria-label="Delete expense">×</button></div></div>').join('')+'</div><div class="rows"><div><b>Total</b><b class="num">'+inr(tot)+'</b></div></div>':'<div class="empty">No expenses for this date.</div>')+'</section>';
+}
+
+/* --- reports --- */
+function reportText(d){
+  const D=day(d),t=totals(d),L=[];
+  L.push('Daily report · '+(S.config.shop||'Shop')+' · '+fmtD(d));
+  SZ.forEach(z=>{const rows=allBrands().map(b=>({b,s:saleOn(b,z.ml,d)})).filter(r=>r.s.q);if(rows.length){L.push('');L.push(z.ml+' ml');rows.forEach(r=>L.push(r.b+': '+r.s.q+' = '+inr(r.s.a)));L.push('Subtotal: '+inr(t.by[z.ml].a))}});
+  if((D.other||[]).length){L.push('');L.push('Other items');D.other.forEach(o=>L.push(o.item+': '+o.qty+' × '+nf(o.price)+' = '+inr(o.amt)))}
+  const pb=purchBlock(d);if(pb){L.push('');L.push('Purchases (incl. TCS): '+inr(pb.foot[6]))}
+  L.push('');L.push('Total amount: '+inr(t.sales));
+  (D.expenses||[]).forEach(e=>L.push(e.cat+': '+inr(e.amt)));
+  L.push('Net balance: '+inr(t.net));return L.join('\n');
+}
+function cashCalc(d){const D=day(d);let cash=0;DEN.forEach(v=>cash+=v*num((D.cash.den||{})[v]));const upi=num(D.cash.upi);return {cash,upi,coll:cash+upi}}
+function vDaily(){
+  const d=ui.date,D=day(d),t=totals(d),brands=allBrands();
+  const secs=SZ.map(z=>{
+    let rows='';
+    brands.forEach(b=>{const st=stockAt(b,z.ml,d),pu=purchQty(b,z.ml,d),sa=saleOn(b,z.ml,d),bal=st+pu-sa.q;
+      rows+='<tr><td>'+esc(b)+'</td><td>'+st+'</td><td>'+(pu||'–')+'</td><td class="'+(bal<0?'neg':'')+'">'+bal+'</td><td>'+(sa.q||'–')+'</td><td>'+(sa.q?nf(sa.a/sa.q):'–')+'</td><td>'+(sa.a?inr(sa.a):'–')+'</td></tr>'});
+    return '<h3>'+z.ml+' ml</h3><div class="tw"><table><thead><tr><th>Brand</th><th>Stock</th><th>Purch.</th><th>Bal.</th><th>Sale</th><th>Price</th><th>Amount</th></tr></thead><tbody>'+rows+'</tbody><tfoot><tr><td>Total</td><td></td><td></td><td></td><td></td><td></td><td>'+inr(t.by[z.ml].a)+'</td></tr></tfoot></table></div>';
+  }).join('');
+  const oth={};(D.other||[]).forEach(o=>{const k=o.item;oth[k]=oth[k]||{q:0,a:0};oth[k].q+=num(o.qty);oth[k].a+=num(o.amt)});
+  const othRows=Object.keys(oth).map(k=>'<tr><td>'+esc(k)+'</td><td>'+oth[k].q+'</td><td>'+inr(oth[k].a)+'</td></tr>').join('');
+  const exp={};(D.expenses||[]).forEach(e=>{exp[e.cat]=(exp[e.cat]||0)+num(e.amt)});
+  const cc=cashCalc(d),diff=nf(cc.coll-t.net);
+  const den=DEN.map(v=>'<div class="denom"><span class="num">₹'+v+'</span><input type="number" inputmode="numeric" min="0" data-cash="'+v+'" value="'+esc((D.cash.den||{})[v]||'')+'" placeholder="0" aria-label="Notes of '+v+'"><span class="num" id="dn'+v+'">'+inr(v*num((D.cash.den||{})[v]))+'</span></div>').join('');
+  return '<section><h2>Daily report</h2><p class="note" style="margin:4px 0 0">'+esc(S.config.shop||'Shop')+' · '+esc(fmtD(d))+'</p>'+secs+
+    (othRows?'<h3>Other items</h3><div class="tw"><table><thead><tr><th>Item</th><th>Qty</th><th>Amount</th></tr></thead><tbody>'+othRows+'</tbody><tfoot><tr><td>Total</td><td></td><td>'+inr(t.oth)+'</td></tr></tfoot></table></div>':'')+
+    purchBlockHtml(d)+'<h3>Day total</h3><div class="rows"><div><span>Total amount</span><b class="num">'+inr(t.sales)+'</b></div>'+
+    Object.keys(exp).map(k=>'<div><span class="muted">'+esc(k)+'</span><span class="num">− '+inr(exp[k])+'</span></div>').join('')+
+    '<div><b>Net balance</b><b class="num">'+inr(t.net)+'</b></div></div></section>'+
+    '<section><h2>Cash collection</h2><div class="form"><div class="fld"><label for="upi">UPI</label><input id="upi" class="mono" type="number" inputmode="decimal" data-upi="1" value="'+esc(D.cash.upi||'')+'" placeholder="0"></div>'+
+    '<div class="fld"><span class="lab">Cash details (number of notes)</span>'+den+'</div>'+
+    '<div class="rows"><div><span>Cash total</span><b class="num" id="cashT">'+inr(cc.cash)+'</b></div><div><span>UPI + cash</span><b class="num" id="collT">'+inr(cc.coll)+'</b></div></div>'+
+    '<div class="diff '+(diff===0?'ok':'bad')+'" id="diffT">'+diffText(diff)+'</div></div></section>'+
+    '<section><h2>Share</h2><div class="form"><textarea id="rtext" readonly rows="8" style="font-family:var(--mono);font-size:13px">'+esc(reportText(d))+'</textarea><button class="btn" data-act="copyRep">Copy report text</button></div></section>';
+}
+function purchBlock(d){
+  const ps=Object.values(S.purchases).filter(p=>p.date===d).sort((a,b)=>(a.t||0)-(b.t||0));
+  if(!ps.length)return null;let a=0,t=0,g=0;
+  const rows=ps.map(p=>{a+=num(p.amt);t+=num(p.tcs);g+=pTot(p);return [p.party||'',p.bill||'',p.brand+' '+p.ml+' ml',num(p.bottles),nf(p.amt),nf(p.tcs),nf(pTot(p))]});
+  return {h:'Purchases',head:['Party','Bill','Item','Bottles','Amount','TCS','Total'],rows,foot:['Total','','','',nf(a),nf(t),nf(g)],money:[4,5,6]};
+}
+function purchBlockHtml(d){const b=purchBlock(d);return b?blockHtml(b):''}
+function diffText(diff){return diff===0?'Cash and UPI match the net balance.':(diff<0?'Short by '+inr(-diff)+' against net balance.':'Excess of '+inr(diff)+' over net balance.')}
+
+function monthSales(m){return allSales().filter(s=>s.d.startsWith(m))}
+function monthNav(){return '<div class="monthnav"><button class="btn ghost" data-act="month" data-d="-1" aria-label="Previous month">‹</button><b>'+monthLabel(ui.month)+'</b><button class="btn ghost" data-act="month" data-d="1" aria-label="Next month">›</button></div>'}
+function blockHtml(b){
+  const fm=(v,i)=>v===''||v==null?'':(b.money&&b.money.includes(i)?inr(v):b.lit&&b.lit.includes(i)?lit(v):v);
+  return (b.h?'<h3>'+esc(b.h)+'</h3>':'')+'<div class="tw"><table><thead><tr>'+b.head.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+
+    b.rows.map(r=>'<tr>'+r.map((v,i)=>'<td>'+esc(fm(v,i))+'</td>').join('')+'</tr>').join('')+'</tbody>'+
+    (b.foot?'<tfoot><tr>'+b.foot.map((v,i)=>'<td>'+esc(fm(v,i))+'</td>').join('')+'</tr></tfoot>':'')+'</table></div>';
+}
+function brandData(){
+  const sl=monthSales(ui.month),rows=[],tot={bulk:0,l:0,a:0,m:0};
+  allBrands().forEach(b=>{const r=sl.filter(s=>s.brand===b);if(!r.length)return;
+    const by={};SZ.forEach(z=>by[z.ml]=0);let l=0,a=0,m=0,bulk=0;
+    r.forEach(s=>{by[s.ml]=(by[s.ml]||0)+num(s.bottles);l+=num(s.bottles)*s.ml/1000;a+=num(s.amt);if(num(s.bulk))bulk+=num(s.bottles);if(num(s.buy)>0)m+=(num(s.price)-num(s.buy))*num(s.bottles)});
+    tot.bulk+=bulk;tot.l+=l;tot.a+=a;tot.m+=m;
+    rows.push([b,by[90],by[180],by[750],bulk,nf(l),nf(a),m?nf(m):'']);});
+  return {h:'',head:['Brand','90 ml','180 ml','750 ml','Bulk btl','Litres','Sales','Margin'],rows,foot:rows.length?['Total','','','',tot.bulk,nf(tot.l),nf(tot.a),tot.m?nf(tot.m):'']:null,money:[6,7],lit:[5]};
+}
+function vBrand(){
+  const b=brandData();
+  return '<section style="display:flex;flex-direction:column;gap:14px"><h2>Brand-wise report</h2>'+monthNav()+
+    (b.rows.length?blockHtml(b)+'<p class="note">Margin counts only sales where a purchase rate was entered. Bottle counts are in bottles.</p>':'<div class="empty">No sales in '+monthLabel(ui.month)+'.</div>')+'</section>';
+}
+function companyData(){
+  const ps=Object.values(S.purchases).filter(p=>(p.date||'').startsWith(ui.month)),g={};
+  ps.forEach(p=>{const k=p.party||'No party';g[k]=g[k]||{bills:new Set(),btl:0,l:0,a:0,t:0};if(p.bill)g[k].bills.add(p.bill);g[k].btl+=num(p.bottles);g[k].l+=num(p.bottles)*p.ml/1000;g[k].a+=num(p.amt);g[k].t+=num(p.tcs)});
+  const keys=Object.keys(g).sort((a,b)=>g[b].a-g[a].a);let tb=0,tl=0,ta=0,tt=0;
+  const rows=keys.map(k=>{const x=g[k];tb+=x.btl;tl+=x.l;ta+=x.a;tt+=x.t;return [k,x.bills.size,x.btl,nf(x.l),nf(x.a),nf(x.t),nf(x.a+x.t)]});
+  return {h:'',head:['Party','Bills','Bottles','Litres','Amount','TCS','Total'],rows,foot:rows.length?['Total','',tb,nf(tl),nf(ta),nf(tt),nf(ta+tt)]:null,money:[4,5,6],lit:[3]};
+}
+function vCompany(){
+  const b=companyData();
+  return '<section style="display:flex;flex-direction:column;gap:14px"><h2>Company-wise report</h2>'+monthNav()+
+    (b.rows.length?blockHtml(b):'<div class="empty">No purchases in '+monthLabel(ui.month)+'.</div>')+'</section>';
+}
+function vMonthly(){
+  const m=ui.month;const days=Object.keys(S.days).filter(d=>d.startsWith(m)).sort();
+  let sl=0,pl=0,sa=0,ex=0;const per=days.map(d=>{const D=S.days[d];let l=0;(D.sales||[]).forEach(s=>l+=num(s.bottles)*s.ml/1000);const t=totals(d);sl+=l;sa+=t.sales;ex+=t.exp;return {d,l,t}});
+  Object.values(S.purchases).forEach(p=>{if((p.date||'').startsWith(m))pl+=num(p.bottles)*p.ml/1000});
+  const mx=Math.max(1,...per.map(p=>p.l));
+  return '<section style="display:flex;flex-direction:column;gap:14px"><h2>Monthly report (bulk litres)</h2>'+monthNav()+
+    '<div class="kpis"><div class="kpi"><span>Litres sold</span><b>'+lit(sl)+'</b></div><div class="kpi"><span>Litres purchased</span><b>'+lit(pl)+'</b></div><div class="kpi"><span>Sales</span><b>'+inr(sa)+'</b></div><div class="kpi"><span>Net after expenses</span><b>'+inr(sa-ex)+'</b></div></div>'+
+    (per.length?'<div>'+per.map(p=>'<div class="ent" style="flex-direction:column;align-items:stretch;gap:6px"><div style="display:flex;justify-content:space-between;gap:10px"><b>'+esc(fmtD(p.d))+'</b><span class="num">'+lit(p.l)+' · '+inr(p.t.sales)+'</span></div><div class="bar"><i style="width:'+Math.round(p.l/mx*100)+'%"></i></div></div>').join('')+'</div>':'<div class="empty">No entries in '+monthLabel(m)+'.</div>')+'</section>';
+}
+function vReports(){
+  const tabs=[['daily','Daily'],['brand','Brand'],['company','Company'],['monthly','Monthly']];
+  const body={daily:vDaily,brand:vBrand,company:vCompany,monthly:vMonthly}[ui.rep]();
+  const ex=store.dl===null?'<p class="note">Saving files is not available in this view.</p>':'<div class="two"><button class="btn" data-act="export" data-v="pdf">Save PDF</button><button class="btn" data-act="export" data-v="xlsx">Save Excel</button></div>';
+  return '<div class="seg fill">'+tabs.map(t=>'<button data-act="rep" data-v="'+t[0]+'" aria-pressed="'+(ui.rep===t[0])+'">'+t[1]+'</button>').join('')+'</div>'+ex+body;
+}
+
+function boxCell(v,ml){
+  const box=boxOf(ml),a=Math.abs(v),b=Math.floor(a/box),r=a-b*box,sg=v<0?'−':'';
+  if(a===0)return '<td>0</td>';
+  return '<td class="'+(v<0?'neg':'')+'">'+sg+b+' box'+(r?'<br><small class="muted">+ '+r+' btl</small>':'')+'</td>';
+}
+function stockTable(){
+  const d=ui.date,brands=allBrands();const sum={};SZ.forEach(z=>sum[z.ml]=0);
+  const rows=brands.map(b=>'<tr><td>'+esc(b)+'</td>'+SZ.map(z=>{const v=stockAt(b,z.ml,d)+purchQty(b,z.ml,d)-saleOn(b,z.ml,d).q;sum[z.ml]+=v;return boxCell(v,z.ml)}).join('')+'</tr>').join('');
+  return '<div class="tw"><table><thead><tr><th>Brand</th><th>90 ml</th><th>180 ml</th><th>750 ml</th></tr></thead><tbody>'+rows+'</tbody><tfoot><tr><td>Total</td>'+SZ.map(z=>boxCell(sum[z.ml],z.ml).replace('<td class="muted"','<td')).join('')+'</tr></tfoot></table></div>';
+}
+function vStock(){
+  const brands=allBrands();
+  return '<section style="display:flex;flex-direction:column;gap:12px"><h2>Stock at end of '+esc(fmtD(ui.date))+'</h2><div id="stockTbl">'+stockTable()+'</div><p class="note">Balance = opening stock + purchases − sales. Shown in boxes, with loose bottles after the box count. Red means more was sold than recorded in stock.</p></section>'+
+    '<section><h2>Opening stock</h2><p class="note" style="margin:4px 0 10px">Bottles in hand before your first entry in this app.</p><div class="form">'+
+    brands.map(b=>'<div class="fld"><span class="lab">'+esc(b)+'</span><div class="three">'+SZ.map(z=>'<input class="mono" type="number" inputmode="numeric" min="0" data-open="'+esc(b)+'|'+z.ml+'" value="'+esc(S.config.opening[b+'|'+z.ml]||'')+'" placeholder="'+z.ml+' ml" aria-label="'+esc(b)+' '+z.ml+' ml opening stock">').join('')+'</div></div>').join('')+'</div></section>';
+}
+
+function vNews(){
+  const list=Object.values(S.news).filter(n=>ui.newsCat==='All'||n.cat===ui.newsCat).sort((a,b)=>(b.t||0)-(a.t||0));const N=ui.f.n;
+  return '<section style="display:flex;flex-direction:column;gap:12px"><h2>News</h2><div class="seg">'+['All'].concat(NEWS).map(c=>'<button data-act="newscat" data-v="'+esc(c)+'" aria-pressed="'+(ui.newsCat===c)+'">'+esc(c)+'</button>').join('')+'</div>'+
+    (list.length?'<div>'+list.map(n=>'<div class="ent" style="align-items:flex-start"><div class="l"><b>'+esc(n.title)+'<span class="tag">'+esc(n.cat)+'</span></b><span>'+esc(fmtD(n.date))+'</span><div style="margin-top:4px;white-space:pre-wrap">'+esc(n.text)+'</div></div><button class="x" data-act="delNews" data-id="'+n.id+'" aria-label="Delete note">×</button></div>').join('')+'</div>':'<div class="empty">Nothing here yet. Add company schemes, excise circulars or industry news you hear about.</div>')+'</section>'+
+    '<section><h2>Add a note</h2><div class="form"><div class="fld"><label for="n_cat">Type</label><select id="n_cat" data-f="n.cat">'+NEWS.map(c=>'<option value="'+esc(c)+'"'+(c===N.cat?' selected':'')+'>'+esc(c)+'</option>').join('')+'</select></div>'+
+    '<div class="fld"><label for="n_title">Title</label><input id="n_title" data-f="n.title" value="'+esc(N.title)+'"></div>'+
+    '<div class="fld"><label for="n_text">Details</label><textarea id="n_text" data-f="n.text">'+esc(N.text)+'</textarea></div><button class="btn" data-act="addNews">Save note</button></div></section>';
+}
+
+function vSetup(){
+  const c=S.config;
+  return '<section><h2>Setup</h2></section><section><div class="form"><div class="fld"><label for="s_shop">Shop name</label><input id="s_shop" data-set="shop" value="'+esc(c.shop)+'" placeholder="Shown on the daily report"></div></div></section>'+
+    '<section><h2>Sale price per bottle</h2><p class="note" style="margin:4px 0 10px">Used as the starting price on every new sale. You can still change it for a single sale.</p><div class="form"><div class="three">'+SZ.map(z=>'<div class="fld"><label for="s_p'+z.ml+'">'+z.ml+' ml</label><input id="s_p'+z.ml+'" class="mono" type="number" inputmode="decimal" data-price="'+z.ml+'" value="'+esc(c.prices[z.ml])+'"></div>').join('')+'</div></div></section>'+
+    '<section><h2>TCS on purchases</h2><p class="note" style="margin:4px 0 10px">Added on each purchase bill amount. You can switch it off for a single bill.</p><div class="form"><div class="fld"><label for="s_tcs">TCS rate (%)</label><input id="s_tcs" class="mono" type="number" inputmode="decimal" data-tcs="1" value="'+esc(c.tcs)+'"></div></div></section>'+
+    '<section><h2>Brands</h2><div class="form"><div>'+c.brands.map(b=>'<div class="ent"><div class="l"><b>'+esc(b)+'</b></div><button class="x" data-act="delBrand" data-v="'+esc(b)+'" aria-label="Remove '+esc(b)+'">×</button></div>').join('')+'</div>'+
+    '<div class="fld"><label for="s_nb">New brand</label><input id="s_nb" data-f="nb" placeholder="Brand name"></div><button class="btn" data-act="addBrand">Add brand</button></div></section>'+
+    '<section><p class="note">'+(store.db?'Entries are saved online and open on any device you sign in with.':'Entries are saved on this phone only. Open the page while signed in to Claude to save them online.')+'</p></section>';
+}
+
+/* ---------- render ---------- */
+function navFor(v){return ['stock','news','setup'].includes(v)?'home':v}
+function render(){
+  const f={home:vHome,sales:vSales,purchases:vPurch,expenses:vExp,reports:vReports,stock:vStock,news:vNews,setup:vSetup}[ui.view]||vHome;
+  $('#view').innerHTML=f();
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===navFor(ui.view)));
+  $('#dateIn').value=ui.date;$('#shopName').textContent=S.config.shop||'DeshiD Hishob';
+  trDom($('#view'));trDom($('.nav'));$('#langBtn').textContent=LANG==='mr'?'EN':'मराठी';
+  setSync(!!store.db,false);liveCalc();
+}
+let dirty=false;
+function refresh(){const a=document.activeElement;if(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)&&$('#view').contains(a)){dirty=true;setSync(!!store.db,false);return}render()}
+function go(v){if(!VIEWS.includes(v))v='home';ui.view=v;try{if(location.hash!=='#'+v)location.hash=v}catch(e){}render();window.scrollTo(0,0)}
+
+function liveCalc(){
+  const F=ui.f;
+  if(ui.view==='sales'){
+    if(ui.saleTab==='liquor'){const q=num(F.qty),b=F.bulk?Math.round(q*boxOf(F.ml)):q;setT('amt',inr(b*num(F.price)));setT('btl',F.bulk?b+' bottles':'')}
+    else setT('amt',inr(num(F.oqty)*num(F.oprice)));
+  }
+  if(ui.view==='purchases'){const P=F.p,box=boxOf(P.ml),btl=Math.round(num(P.boxes)*box+num(P.loose)),amt=num(P.boxes)*num(P.rate)+num(P.loose)*num(P.rate)/box;
+    const tcs=P.tcs?amt*num(S.config.tcs)/100:0;
+    setT('pamt',inr(amt));setT('ptcs',inr(tcs));setT('ptot',inr(amt+tcs));setT('pbtl',btl+' bottles · '+lit(btl*P.ml/1000))}
+}
+
+/* ---------- actions ---------- */
+function addSale(){
+  const F=ui.f,q=num(F.qty),price=num(F.price);
+  if(q<=0){toast('Enter a quantity');return}if(price<=0){toast('Enter the sale price');return}
+  const bottles=F.bulk?Math.round(q*boxOf(F.ml)):Math.round(q);
+  const e={id:uid(),brand:F.brand,ml:F.ml,bottles,bulk:F.bulk?q:0,buy:num(F.buy),price,amt:nf(bottles*price),t:Date.now()};
+  ensureDay(ui.date).sales.push(e);saveDay(ui.date);F.qty='';toast('Added '+inr(e.amt));render();
+}
+function addOther(){
+  const F=ui.f,q=num(F.oqty),p=num(F.oprice);
+  if(q<=0){toast('Enter a quantity');return}if(p<=0){toast('Enter the price');return}
+  ensureDay(ui.date).other.push({id:uid(),item:F.oitem,qty:q,price:p,amt:nf(q*p),t:Date.now()});saveDay(ui.date);F.oqty='';toast('Added '+inr(q*p));render();
+}
+function addExp(){
+  const F=ui.f,a=num(F.eamt);if(a<=0){toast('Enter the amount');return}
+  ensureDay(ui.date).expenses.push({id:uid(),cat:F.ecat,amt:a,note:F.enote.trim(),t:Date.now()});saveDay(ui.date);F.eamt='';F.enote='';toast('Expense added');render();
+}
+function addPurch(){
+  const P=ui.f.p,box=boxOf(P.ml),boxes=num(P.boxes),loose=num(P.loose),rate=num(P.rate);
+  if(boxes<=0&&loose<=0){toast('Enter boxes or bottles');return}
+  const bottles=Math.round(boxes*box+loose),amt=nf(boxes*rate+loose*rate/box),tcs=P.tcs?nf(amt*num(S.config.tcs)/100):0,total=nf(amt+tcs),id=uid();
+  S.purchases[id]={id,date:P.date||ui.date,party:P.party.trim(),bill:P.bill.trim(),tp:P.tp.trim(),sr:P.sr.trim(),brand:P.brand,note:'',ml:P.ml,boxes,loose,bottles,batch:P.batch.trim(),bmonth:P.bmonth,rate,amt,tcs,total,t:Date.now()};
+  savePurch(id);P.boxes='';P.loose='';if(/^\d+$/.test(P.sr))P.sr=String(+P.sr+1);toast('Purchase added · '+inr(total));render();
+}
+function bindDel(kind,id){
+  if(kind==='sale'||kind==='other'||kind==='exp'){
+    const D=ensureDay(ui.date),key=kind==='sale'?'sales':kind==='other'?'other':'expenses',d=ui.date;
+    const i=D[key].findIndex(x=>x.id===id);if(i<0)return;const item=D[key].splice(i,1)[0];saveDay(d);
+    toast('Entry deleted',()=>{ensureDay(d)[key].push(item);saveDay(d);render()});render();
+  }else if(kind==='purch'){const item=S.purchases[id];delete S.purchases[id];savePurch(id);toast('Purchase deleted',()=>{S.purchases[id]=item;savePurch(id);render()});render()}
+  else if(kind==='news'){const item=S.news[id];delete S.news[id];saveNews(id);toast('Note deleted',()=>{S.news[id]=item;saveNews(id);render()});render()}
+}
+function act(a,ds){
+  switch(a){
+    case 'nav':go(ds.v);break;
+    case 'f':{setPath(ds.k,ds.t==='n'?Number(ds.v):ds.v);if(ds.k==='ml'||ds.k==='brand')applySaleDefaults();render();break}
+    case 'step':{const cur=num(getPath(ds.k)),nv=Math.max(0,cur+Number(ds.d));setPath(ds.k,String(nv));const inp=document.querySelector('[data-f="'+ds.k+'"]');if(inp)inp.value=nv;liveCalc();break}
+    case 'bulk':ui.f.bulk=!ui.f.bulk;ui.f.qty='';render();break;
+    case 'lang':LANG=LANG==='mr'?'en':'mr';try{localStorage.setItem('dh_lang',LANG)}catch(e){}render();break;
+    case 'tcs':ui.f.p.tcs=!ui.f.p.tcs;render();break;
+    case 'export':doExport(ds.v);break;
+    case 'saletab':ui.saleTab=ds.v;render();break;
+    case 'oitem':{ui.f.oitem=ds.v;ui.f.oprice=OTHER.find(o=>o.name===ds.v).prices[0];render();break}
+    case 'oprice':ui.f.oprice=Number(ds.v);render();break;
+    case 'addSale':addSale();break;
+    case 'addOther':addOther();break;
+    case 'addExp':addExp();break;
+    case 'addPurch':addPurch();break;
+    case 'delSale':bindDel('sale',ds.id);break;
+    case 'delOther':bindDel('other',ds.id);break;
+    case 'delExp':bindDel('exp',ds.id);break;
+    case 'delPurch':bindDel('purch',ds.id);break;
+    case 'delNews':bindDel('news',ds.id);break;
+    case 'undo':if(window._undo){window._undo();window._undo=null;$('#toast').classList.remove('show')}break;
+    case 'rep':ui.rep=ds.v;render();break;
+    case 'month':ui.month=shiftMonth(ui.month,Number(ds.d));render();break;
+    case 'newscat':ui.newsCat=ds.v;render();break;
+    case 'addNews':{const N=ui.f.n;if(!N.title.trim()){toast('Add a title');return}const id=uid();S.news[id]={id,cat:N.cat,title:N.title.trim(),text:N.text.trim(),date:todayStr(),t:Date.now()};saveNews(id);N.title='';N.text='';toast('Note saved');render();break}
+    case 'addBrand':{const v=(ui.f.nb||'').trim();if(!v){toast('Type a brand name');return}if(!S.config.brands.includes(v))S.config.brands.push(v);ui.f.nb='';saveCfg();render();break}
+    case 'delBrand':S.config.brands=S.config.brands.filter(b=>b!==ds.v);saveCfg();render();break;
+    case 'copyRep':{const ta=$('#rtext');const txt=ta.value;(navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>toast('Report copied')).catch(()=>{ta.focus();ta.select();toast('Select and copy the text')});break}
+  }
+}
+
+/* ---------- export ---------- */
+const LIB={xlsx:'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',pdf:'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',at:'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js'};
+const libs={};
+function loadLib(u){if(!libs[u])libs[u]=new Promise((ok,no)=>{const e=document.createElement('script');e.src=u;e.onload=ok;e.onerror=()=>{delete libs[u];no(new Error('lib'))};document.head.appendChild(e)});return libs[u]}
+function dailyData(d){
+  const D=day(d),t=totals(d),blocks=[];
+  SZ.forEach(z=>{const rows=allBrands().map(b=>{const st=stockAt(b,z.ml,d),pu=purchQty(b,z.ml,d),sa=saleOn(b,z.ml,d);return [b,st,pu,st+pu-sa.q,sa.q,sa.q?nf(sa.a/sa.q):'',nf(sa.a)]});
+    blocks.push({h:z.ml+' ml',head:['Brand','Stock','Purchase','Balance','Sale','Price','Amount'],rows,foot:['Total','','','','','',nf(t.by[z.ml].a)],money:[5,6]})});
+  const oth={};(D.other||[]).forEach(o=>{oth[o.item]=oth[o.item]||{q:0,a:0};oth[o.item].q+=num(o.qty);oth[o.item].a+=num(o.amt)});
+  const ok=Object.keys(oth);if(ok.length)blocks.push({h:'Other items',head:['Item','Qty','Amount'],rows:ok.map(k=>[k,oth[k].q,nf(oth[k].a)]),foot:['Total','',nf(t.oth)],money:[2]});
+  const pb=purchBlock(d);if(pb)blocks.push(pb);
+  const sum=[['Total amount',nf(t.sales)]];(D.expenses||[]).forEach(e=>sum.push(['Expense · '+e.cat+(e.note?' ('+e.note+')':''),-nf(e.amt)]));
+  blocks.push({h:'Day total',head:['Item','Amount'],rows:sum,foot:['Net balance',nf(t.net)],money:[1]});
+  const cc=cashCalc(d),cr=[['UPI','',nf(cc.upi)]];DEN.forEach(v=>{const n=num((D.cash.den||{})[v]);if(n)cr.push(['₹'+v+' notes',n,v*n])});
+  blocks.push({h:'Cash collection',head:['Item','Count','Amount'],rows:cr,foot:['UPI + cash','',nf(cc.coll)],money:[2]});
+  return {title:(S.config.shop||'DeshiD Hishob')+' - Daily report',sub:fmtD(d),file:'DeshiD-Daily-'+d,blocks};
+}
+function monthlyData(){
+  const m=ui.month,days=Object.keys(S.days).filter(d=>d.startsWith(m)).sort();let sl=0,pl=0,sa=0,ex=0;
+  const rows=days.map(d=>{let l=0;(S.days[d].sales||[]).forEach(x=>l+=num(x.bottles)*x.ml/1000);const t=totals(d);sl+=l;sa+=t.sales;ex+=t.exp;return [fmtD(d),nf(l),nf(t.sales),nf(t.exp),nf(t.net)]});
+  Object.values(S.purchases).forEach(p=>{if((p.date||'').startsWith(m))pl+=num(p.bottles)*p.ml/1000});
+  return {title:(S.config.shop||'DeshiD Hishob')+' - Monthly report',sub:monthLabel(m),file:'DeshiD-Monthly-'+m,blocks:[
+    {h:'Summary',head:['Item','Value'],rows:[['Litres sold (L)',nf(sl)],['Litres purchased (L)',nf(pl)],['Sales',nf(sa)],['Expenses',nf(ex)],['Net after expenses',nf(sa-ex)]],money:[]},
+    {h:'Day by day',head:['Date','Litres','Sales','Expenses','Net'],rows,foot:rows.length?['Total',nf(sl),nf(sa),nf(ex),nf(sa-ex)]:null,money:[2,3,4],lit:[1]}]};
+}
+function buildReport(){
+  const sh=S.config.shop||'DeshiD Hishob';
+  if(ui.rep==='daily')return dailyData(ui.date);
+  if(ui.rep==='brand')return {title:sh+' - Brand-wise report',sub:monthLabel(ui.month),file:'DeshiD-Brand-'+ui.month,blocks:[brandData()]};
+  if(ui.rep==='company')return {title:sh+' - Company-wise report',sub:monthLabel(ui.month),file:'DeshiD-Company-'+ui.month,blocks:[companyData()]};
+  return monthlyData();
+}
+function xlsxBytes(R){
+  const aoa=[[R.title],[R.sub],[]],cells=[];
+  R.blocks.forEach(b=>{if(b.h)aoa.push([b.h]);aoa.push(b.head);const st=aoa.length;b.rows.forEach(r=>aoa.push(r));if(b.foot)aoa.push(b.foot);
+    (b.money||[]).forEach(c=>{for(let i=0;i<b.rows.length+(b.foot?1:0);i++)cells.push([st+i,c])});aoa.push([])});
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  cells.forEach(x=>{const a=XLSX.utils.encode_cell({r:x[0],c:x[1]});if(ws[a]&&typeof ws[a].v==='number')ws[a].z='#,##0.00'});
+  const w=Math.max.apply(null,aoa.map(r=>r.length));ws['!cols']=Array.from({length:w},(_,i)=>({wch:i===0?26:14}));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Report');
+  return new Uint8Array(XLSX.write(wb,{bookType:'xlsx',type:'array'}));
+}
+function pdfBytes(R){
+  const doc=new window.jspdf.jsPDF({unit:'pt',format:'a4'});let y=44;
+  doc.setFontSize(15);doc.setTextColor(20);doc.text(R.title,40,y);y+=16;doc.setFontSize(10);doc.setTextColor(100);doc.text(R.sub,40,y);y+=8;
+  R.blocks.forEach(b=>{
+    const fm=(v,i)=>v===''||v==null?'':(b.money&&b.money.includes(i)?(v<0?'- ':'')+'Rs. '+Math.abs(v).toLocaleString('en-IN',{maximumFractionDigits:2}):b.lit&&b.lit.includes(i)?v+' L':String(v));
+    if(b.h){if(y>740){doc.addPage();y=44}doc.setFontSize(11);doc.setTextColor(20);doc.text(b.h,40,y+18);y+=22}
+    doc.autoTable({startY:y+4,head:[b.head],body:b.rows.map(r=>r.map(fm)),foot:b.foot?[b.foot.map(fm)]:undefined,theme:'grid',margin:{left:40,right:40},
+      styles:{fontSize:8.5,cellPadding:4,textColor:30},headStyles:{fillColor:[14,90,71],textColor:255},footStyles:{fillColor:[231,237,232],textColor:20,fontStyle:'bold'},
+      didParseCell:h=>{if(h.column.index>0)h.cell.styles.halign='right'}});
+    y=doc.lastAutoTable.finalY+8;
+  });
+  return doc.output('arraybuffer');
+}
+async function doExport(kind){
+  if(!store.dl){toast('Saving files is not available here');return}
+  const keepL=LANG;LANG='en';let R;try{R=buildReport()}finally{LANG=keepL}
+  toast('Preparing '+(kind==='pdf'?'PDF':'Excel')+'…');
+  try{
+    let data;
+    if(kind==='xlsx'){await loadLib(LIB.xlsx);data=xlsxBytes(R)}
+    else{await loadLib(LIB.pdf);await loadLib(LIB.at);data=pdfBytes(R)}
+    await store.dl.save({filename:R.file+'.'+kind,data});toast('File saved. Send it from your phone.');
+  }catch(e){
+    if(e&&e.code==='declined'){$('#toast').classList.remove('show');return}
+    toast(e&&e.message==='lib'?'Could not load the export tool. Check the internet and try again.':'Could not create the file');
+  }
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(t)act(t.dataset.act,t.dataset)});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.dataset.f){setPath(t.dataset.f,t.value);liveCalc();return}
+  if(t.dataset.cash){const D=ensureDay(ui.date);D.cash.den[t.dataset.cash]=num(t.value)||0;updCash();return}
+  if(t.dataset.upi){ensureDay(ui.date).cash.upi=num(t.value);updCash();return}
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.id==='dateIn'){if(t.value){ui.date=t.value;render()}return}
+  if(t.dataset.f){setPath(t.dataset.f,t.value);if(t.dataset.r){if(t.dataset.f==='brand')applySaleDefaults();render()}return}
+  if(t.dataset.cash||t.dataset.upi){saveDay(ui.date);return}
+  if(t.dataset.open){const v=num(t.value);if(v)S.config.opening[t.dataset.open]=v;else delete S.config.opening[t.dataset.open];saveCfg();const s=$('#stockTbl');if(s)s.innerHTML=stockTable();return}
+  if(t.dataset.set==='shop'){S.config.shop=t.value.trim();saveCfg();$('#shopName').textContent=S.config.shop||'DeshiD Hishob';return}
+  if(t.dataset.tcs){S.config.tcs=num(t.value);saveCfg();return}
+  if(t.dataset.price){S.config.prices[t.dataset.price]=num(t.value);saveCfg();return}
+});
+document.addEventListener('focusout',()=>{if(!dirty)return;setTimeout(()=>{const a=document.activeElement;if(!(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName))){dirty=false;render()}},350)});
+function updCash(){
+  const d=ui.date,D=day(d),cc=cashCalc(d),t=totals(d),diff=nf(cc.coll-t.net);
+  DEN.forEach(v=>setT('dn'+v,inr(v*num((D.cash.den||{})[v]))));
+  setT('cashT',inr(cc.cash));setT('collT',inr(cc.coll));
+  const el=$('#diffT');if(el){el.textContent=diffText(diff);el.className='diff '+(diff===0?'ok':'bad')}
+}
+window.addEventListener('hashchange',()=>{const h=(location.hash||'').slice(1);if(VIEWS.includes(h)&&h!==ui.view){ui.view=h;render()}});
+
+/* ---------- boot ---------- */
+(function boot(){
+  const h=(location.hash||'').slice(1);if(VIEWS.includes(h))ui.view=h;
+  applySaleDefaults();render();
+  const c=window.claude;
+  if(c&&c.use)c.use('downloads').then(x=>{store.dl=x||null;if(ui.view==='reports')render()}).catch(()=>{store.dl=null});
+  if(!c||!c.use){loadLocal();applySaleDefaults();render();return}
+  c.use('db').then(db=>{
+    if(db){store.db=db;subscribe();setSync(true,false)}
+    else{loadLocal();applySaleDefaults();render()}
+  }).catch(()=>{loadLocal();applySaleDefaults();render()});
+})();
+})();
+</script>
+
+</body></html>
